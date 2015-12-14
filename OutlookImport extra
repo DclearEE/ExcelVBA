@@ -1,0 +1,40 @@
+Sub iAuditorFilter()
+    Sheets("Summary").Select
+    Selection.AutoFilter
+    ActiveSheet.Range("A1:E1").AutoFilter Field:=4, Criteria1:="<>", Criteria2:="<>SCISSOR LIFT"
+End Sub
+
+Sub ResetFilter()
+    Sheets("Summary").Select
+    Range("A1:E1").Select
+    Selection.AutoFilter
+    Selection.AutoFilter
+End Sub
+
+Sub ElseFilter()
+    Sheets("Summary").Select
+    Selection.AutoFilter
+    ActiveSheet.Range("A1:E1").AutoFilter Field:=5, Criteria1:="="
+End Sub
+
+Sub UpdateChart()
+
+    Application.ScreenUpdating = False
+    Sheets("Chart").Select
+    Columns("AA:AA").Select
+    Selection.ClearContents
+    Sheets("Summary").Select
+    'Run ("iAuditorFilter")
+    Range("Q2:Q5000").Select
+    Selection.Copy
+    Sheets("Chart").Select
+    Range("AA2").Select
+    Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
+    'Run ("ResetFilter")
+    Sheets("Chart").Select
+    Range("C2").Select
+End Sub
+
+'Daniel Cleary
+
