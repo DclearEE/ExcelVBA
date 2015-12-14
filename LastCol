@@ -1,0 +1,11 @@
+Function LastCol(SH As Worksheet)
+    On Error Resume Next
+    LastCol = SH.Cells.Find(What:="*", _
+                            After:=SH.Range("A1"), _
+                            Lookat:=xlPart, _
+                            LookIn:=xlFormulas, _
+                            SearchOrder:=xlByColumns, _
+                            SearchDirection:=xlPrevious, _
+                            MatchCase:=False).Column
+    On Error GoTo 0
+End Function
