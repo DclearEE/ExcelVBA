@@ -1,0 +1,47 @@
+Sub NewJob()
+
+ 'To add text box
+ Dim Number As Variant
+ Dim Name As Variant
+ Dim Foreman As Variant
+ 
+    'Copy top row of Master Sheet
+    Sheets("Master Sheet").Select
+    Rows("1:1").Select
+    Selection.Copy
+    
+    Number = InputBox("Enter the job's number")
+    Name = InputBox("Enter the jobs's name")
+    Foreman = InputBox("Enter the jobs's foreman")
+    
+    'To add new sheet
+    Sheets.Add After:=Sheets(ActiveWorkbook.Worksheets.Count)
+    'To rename the new sheet
+    ActiveSheet.Name = Number
+    
+    'Paste in the top row and correct width
+    Rows("1:1").Select
+    Selection.PasteSpecial Paste:=xlPasteColumnWidths, Operation:=xlNone, _
+        SkipBlanks:=False, Transpose:=False
+    ActiveSheet.Paste
+    Application.CutCopyMode = False
+    Range("A1:I1").Select
+    Selection.AutoFilter
+        Range("G2").Select
+    ActiveCell.FormulaR1C1 = Foreman
+        Range("H2").Select
+    ActiveCell.FormulaR1C1 = Name
+        Range("I1").Select
+    ActiveCell.Hyperlinks.Add Anchor:=Selection, Address:="", SubAddress:= _
+        "'Tool Master'!A1", TextToDisplay:="Tool Master"
+    
+    'freeze top row
+        With ActiveWindow
+        .SplitColumn = 0
+        .SplitRow = 1
+    End With
+
+    ActiveWindow.FreezePanes = True
+     
+    Range("A2").Select
+End Sub
