@@ -1,0 +1,171 @@
+Sub getMail()
+     
+    Dim olApp As Object
+    Dim olFolder As Object
+    Dim olMailItem As Object
+     
+     
+    Dim strTo As String
+    Dim strFrom As String
+    Dim dateSent As Variant
+    Dim dateReceived As Variant
+    Dim strSubject As String
+    Dim strBody As String
+     
+    Dim loopControl As Variant
+    Dim mailCount As Long
+    Dim totalItems As Long
+     
+     
+     'Turn off screen updating
+    Application.ScreenUpdating = False
+     
+     'Setup headers for information
+    Sheets("E-mail List").Select
+    Range("A1:G5000").Select
+    Selection.ClearContents
+    
+    Range("A1:F1").Value = Array("To", "From", "Subject", "Body", "Sent (from Sender)", "Received (by Recipient)", "File")
+        With ActiveWindow
+        .SplitColumn = 0
+        .SplitRow = 1
+    End With
+    ActiveWindow.FreezePanes = True
+    Rows("1:1").Select
+    Selection.AutoFilter
+    
+     'Format columns E and F to include seconds in timestamp
+    Columns("E:F").EntireColumn.NumberFormat = "MM/DD/YYYY"
+     
+     'Create instance of Outlook
+    Set olApp = CreateObject("Outlook.Application")
+     
+     
+     'Select folder to extract mail from
+    Set olFolder = olApp.GetNamespace("MAPI").Folders("Safety").Folders("Inbox")
+     
+     
+     'Get count of mail items
+    totalItems = olFolder.items.Count
+    mailCount = 0
+     
+     
+     'Loop through mail items in folder
+    For Each loopControl In olFolder.items
+         
+             
+
+         'If loopControl is a mail item then continue
+        If TypeName(loopControl) = "MailItem" Then
+
+          
+             
+             'Increase mailCount
+            mailCount = mailCount + 1
+             
+             
+             'Inform user of item count in status bar
+            Application.StatusBar = "Reading email no. " & mailCount & " of " & totalItems
+             
+             
+             'Get mail item
+            Set olMailItem = loopControl
+             
+             'Get Details
+            With olMailItem
+                strTo = .To
+                strFrom = .SenderName
+                 'If sender displays name only, show name followed by email address e.g.(Bloggs, Joe < j.bloggs@mail.com >)
+                If InStr(1, strFrom, "@") < 1 Then strFrom = strFrom & " - < " & .SenderEmailAddress & " >"
+                dateSent = .SentOn
+                dateReceived = .ReceivedTime
+                strSubject = .Subject
+                strBody = .Body
+                strID = .EntryID
+            End With
+            
+             'Place information into spreadsheet
+             'import information starting from last blank row in column A
+              
+            With Range("A" & Rows.Count).End(xlUp).Offset(1, 0)
+            
+  
+                .Value = strTo
+                .Offset(0, 1).Value = strFrom
+                .Offset(0, 2).Value = strSubject
+
+                 'Check for previous replies by looking for "From:" in the body text
+                 'Check for the word "From:"
+                If InStr(1, strBody, "From:") > 0 Then
+                     'If exists, copy start of email body, up to the position of "From:"
+                    .Offset(0, 3).Value = Mid(strBody, 1, InStr(1, strBody, "From:") - 1)
+                Else
+                     'If doesn't exist, copy entire mail body
+                    .Offset(0, 3).Value = strBody
+                End If
+                 
+                .Offset(0, 4).Value = dateSent
+                .Offset(0, 5).Value = dateReceived
+                .Offset(o, 6).Value = strFileName
+
+            End With
+             
+             'Release item from memory
+            Set olMailItem = Nothing
+          
+
+        End If
+         
+      
+         'Next Item
+    Next loopControl
+     
+     
+     'Release items from memory
+    Set olFolder = Nothing
+    Set olApp = Nothing
+     
+     'Resume screen updating
+    Application.ScreenUpdating = True
+     
+     
+     'reset status bar
+    Application.StatusBar = False
+    
+    'Sort emails from newest to oldest
+    Columns("E:E").Select
+    ActiveWorkbook.Worksheets("E-mail List").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("E-mail List").Sort.SortFields.Add Key:=Range("E1") _
+        , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("E-mail List").Sort
+        .SetRange Range("A2:F5000")
+        .Header = xlNo
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    Application.ScreenUpdating = False
+    'Copy equation from top rows all the way down to the mailcount
+        'Auto fill fomulas
+    Sheets("Organized Data").Select
+    Range("A2:F2").Select
+    Selection.AutoFill Destination:=Range("A2:F" & mailCount + 1), Type:=xlFillDefault
+        'Copy and Paste date as a Value
+    Range("A2:A5000").Select
+    Selection.Copy
+    Sheets("Summary").Select
+        'Auto fill fomulas
+    Range("A2:Q2").Select
+    Selection.AutoFill Destination:=Range("A2:Q" & mailCount + 1), Type:=xlFillDefault
+           
+    Sheets("Summary").Select
+    Range("F2").Select
+     
+    'Inform user that code has finished
+    MsgBox mailCount & " messages copied successfully.", vbInformation, "Complete"
+    
+End Sub
+
+'Daniel Cleary
+
