@@ -1,0 +1,11 @@
+Sub DuplicateCounter()
+
+    Sheets("Master Sheet").Select
+    Range("I2:J2").Select
+    ActiveCell.FormulaR1C1 = "=C[-8]&C[-6]&C[-5]"
+    Range("J2").Select
+    ActiveCell.FormulaR1C1 = "=COUNTIF(C[-1],RC[-1])"
+    Range("I2:J2").Select
+    Selection.AutoFill Destination:=Range("I2:J2000"), Type:=xlFillDefault
+    Range("I2:J2000").Select
+End Sub
