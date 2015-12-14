@@ -1,0 +1,12 @@
+Function LastRow(SH As Worksheet)
+    On Error Resume Next
+    LastRow = SH.Cells.Find(What:="*", _
+                            After:=SH.Range("A1"), _
+                            Lookat:=xlPart, _
+                            LookIn:=xlFormulas, _
+                            SearchOrder:=xlByRows, _
+                            SearchDirection:=xlPrevious, _
+                            MatchCase:=False).Row
+    On Error GoTo 0
+End Function
+
