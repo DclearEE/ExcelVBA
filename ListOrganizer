@@ -1,0 +1,156 @@
+Sub MasterSheet()
+    Dim SH As Worksheet
+    Dim DestSh As Worksheet
+    Dim Last As Long
+    Dim shLast As Long
+    Dim CopyRng As Range
+    Dim StartRow As Long
+    Dim i As Long
+    With Application
+        .ScreenUpdating = False
+        .EnableEvents = False
+    End With
+    
+    ' Writes the date and time the program was ran in H1
+    Sheets("Tool Master").Select
+    Range("B1").Select
+    ActiveCell.FormulaR1C1 = "=NOW()"
+    
+
+    'Delete the sheet "Master Sheet" if it exist
+    Application.DisplayAlerts = False
+    On Error Resume Next
+    ActiveWorkbook.Worksheets("Master Sheet").Delete
+    On Error GoTo 0
+    Application.DisplayAlerts = True
+    
+    'Deletes links on "Tool Master"
+    Dim cell As Range
+        Range("D3:D1001").Select
+    Selection.ClearContents
+    
+    'writes new links based on sheet name and cells G2 & H2
+    Range("D3").Select
+    For Each SH In ActiveWorkbook.Worksheets
+    
+    
+     If ActiveSheet.Name <> SH.Name Then
+         ActiveCell.Hyperlinks.Add Anchor:=Selection, Address:="", SubAddress:= _
+         "'" & SH.Name & "'" & "!A1", TextToDisplay:=(SH.Name & "   " & SH.Range("I2") & "   " & SH.Range("H2"))
+         
+         ActiveCell.Offset(1, 0).Select
+     End If
+     
+    Next SH
+
+    'Sorts job links alphabetically
+        Range("D3:D1001").Select
+    ActiveWorkbook.Worksheets("Tool Master").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Tool Master").Sort.SortFields.Add Key:=Range("D6") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("Tool Master").Sort
+        .SetRange Range("D3:D1001")
+        .Header = xlGuess
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+        Range("D2").Select
+    End With
+    
+
+    'Add a worksheet with the name "Master Sheet"
+    Set DestSh = ActiveWorkbook.Worksheets.Add
+    DestSh.Name = "Master Sheet"
+
+
+    'Fill in the start row
+    StartRow = 2
+
+    'loop through all worksheets and copy the data to the DestSh
+    For Each SH In ActiveWorkbook.Worksheets
+    'Ignores sheet "Tool Master"
+        If IsError(Application.Match(SH.Name, _
+    Array(DestSh.Name, "Tool Master"), 0)) Then
+
+    'Copy header row, change the range if you use more columns
+    If WorksheetFunction.CountA(DestSh.UsedRange) = 0 Then
+        SH.Range("A1:Z1").Copy DestSh.Range("A1")
+    End If
+
+            'Find the last row with data on the DestSh and sh
+            Last = LastRow(DestSh)
+            shLast = LastRow(SH)
+                
+                'Reset Filters on each sheet
+                SH.Range("A1:J1").AutoFilter
+                SH.Range("A1:J1").AutoFilter
+                
+            'If sh is not empty and if the last row >= StartRow copy the CopyRng
+            If shLast > 0 And shLast >= StartRow Then
+            
+                'Set the range that you want to copy
+                Set CopyRng = SH.Range(SH.Rows(StartRow), SH.Rows(shLast))
+
+                'Test if there enough rows in the DestSh to copy all the data
+                If Last + CopyRng.Rows.Count > DestSh.Rows.Count Then
+                    MsgBox "There are not enough rows in the Destsh"
+                    GoTo ExitTheSub
+                End If
+
+                ' Copies values
+                CopyRng.Copy
+                With DestSh.Cells(Last + 1, "A")
+                    .PasteSpecial xlPasteValues
+                    .PasteSpecial xlPasteFormats
+                    Application.CutCopyMode = False
+                End With
+                
+                'Optional: This will copy the sheet name in the H column
+                DestSh.Cells(Last + 1, "I").Resize(CopyRng.Rows.Count).Value = SH.Name
+                DestSh.Cells(Last + 1, "H").Resize(CopyRng.Rows.Count).Value = SH.Range("H2")
+
+            End If
+
+        End If
+
+    Next
+
+    
+ExitTheSub:
+    'Filter, Sort, and AutoFit the column width in the DestSh sheet
+    Application.GoTo DestSh.Cells(1)
+
+    'Filters on
+    Range("A1:J1").Select
+    Selection.AutoFilter
+
+    'Sort
+
+    'Column width
+    DestSh.Columns.AutoFit
+    
+    With Application
+        .ScreenUpdating = True
+        .EnableEvents = True
+    End With
+    
+    'freeze top row
+    With ActiveWindow
+        .SplitColumn = 0
+        .SplitRow = 1
+    End With
+    ActiveWindow.FreezePanes = True
+    
+    'Update date and time
+    Sheets("Tool Master").Select
+   With Range("B1")
+    .Value = Date & " " & Time
+    .NumberFormat = "M/DD/YYYY h:mm AM/PM"
+    End With
+
+
+    
+End Sub
+
+
