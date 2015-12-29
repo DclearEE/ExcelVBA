@@ -9,3 +9,5 @@ Function LastCol(SH As Worksheet)
                             MatchCase:=False).Column
     On Error GoTo 0
 End Function
+
+'Credit to Ron de Bruin Excel Automation
