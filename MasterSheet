@@ -11,7 +11,7 @@ Sub MasterSheet()
         .EnableEvents = False
     End With
     
-    ' Writes the date and time the program was ran in H1
+    'Writes the date and time the program was ran in H1
     Sheets("Tool Master").Select
     Range("B1").Select
     ActiveCell.FormulaR1C1 = "=NOW()"
