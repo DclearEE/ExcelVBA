@@ -11,7 +11,7 @@ Sub MasterSheet()
         .EnableEvents = False
     End With
     
-    'Writes the date and time the program was ran in H1
+    ' Writes the date and time the program was ran in H1
     Sheets("Tool Master").Select
     Range("B1").Select
     ActiveCell.FormulaR1C1 = "=NOW()"
@@ -82,10 +82,7 @@ Sub MasterSheet()
             Last = LastRow(DestSh)
             shLast = LastRow(SH)
                 
-                'Reset Filters on each sheet
-                SH.Range("A1:J1").AutoFilter
-                SH.Range("A1:J1").AutoFilter
-                
+
             'If sh is not empty and if the last row >= StartRow copy the CopyRng
             If shLast > 0 And shLast >= StartRow Then
             
@@ -122,8 +119,7 @@ ExitTheSub:
     Application.GoTo DestSh.Cells(1)
 
     'Filters on
-    Range("A1:J1").Select
-    Selection.AutoFilter
+    Range("A1:J1").AutoFilter
 
     'Sort
 
@@ -144,7 +140,7 @@ ExitTheSub:
     
     'Update date and time
     Sheets("Tool Master").Select
-   With Range("B1")
+    With Range("B1")
     .Value = Date & " " & Time
     .NumberFormat = "M/DD/YYYY h:mm AM/PM"
     End With
@@ -152,4 +148,3 @@ ExitTheSub:
 
     
 End Sub
-
