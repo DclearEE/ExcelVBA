@@ -8,4 +8,5 @@ Sub DuplicateCounter()
     Range("I2:J2").Select
     Selection.AutoFill Destination:=Range("I2:J2000"), Type:=xlFillDefault
     Range("I2:J2000").Select
+    
 End Sub
